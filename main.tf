@@ -20,17 +20,18 @@ module "aws_dms" {
   instance_subnet_group_id              = var.instance_subnet_group_id
   instance_vpc_security_group_ids       = var.instance_vpc_security_group_ids
 
-  # Subnet 
+  # Subnet
+  create_subnet_group      = var.create_subnet_group
   subnet_group_id          = var.subnet_group_id
   subnet_group_description = var.subnet_group_description
   subnet_group_subnet_ids  = var.subnet_group_subnet_ids
-
+  subnet_group_tags        = var.subnet_group_tags
 
   endpoints = var.endpoints
-
-  s3_endpoints = var.s3_endpoints
 
   replication_tasks = var.replication_tasks
 
   replication_tasks_serverless = var.replication_tasks_serverless
+
+  s3_endpoints = var.s3_endpoints
 }

@@ -4,6 +4,37 @@ variable "tags" {
   default     = {}
 }
 
+variable "region" {
+  type        = string
+  description = "AWS region"
+  default     = "us-east-1"
+}
+
+##############
+# Certificate
+##############
+
+variable "create_certificate" {
+  type    = bool
+  default = false
+}
+
+variable "certificate" {
+  description = "DMS certificate to be created"
+
+  type = object({
+    certificate_id     = string
+    certificate_pem    = optional(string, null)
+    certificate_wallet = optional(string, null)
+    tags               = optional(map(string), {})
+  })
+  default = {
+    certificate_id     = "dms-poc-cert-2024"
+    certificate_pem    = null
+    certificate_wallet = null
+    tags               = null
+  }
+}
 
 ##########
 # Instance
@@ -139,12 +170,6 @@ variable "subnet_group_tags" {
 # Endpoints
 ############
 
-variable "endpoint_secret_name" {
-  description = "Secret ID to fetch the endpoint password"
-  type        = string
-  default     = {}
-}
-
 variable "endpoints" {
   type = map(object({
     endpoint_id                     = string
@@ -152,7 +177,7 @@ variable "endpoints" {
     engine_name                     = string
     extra_connection_attributes     = optional(string)
     database_name                   = optional(string)
-    kms_key_arn                     = string
+    kms_key_arn                     = optional(string)
     port                            = optional(number)
     server_name                     = optional(string)
     ssl_mode                        = optional(string)
@@ -212,7 +237,7 @@ variable "endpoints" {
       topic                          = optional(string)
     }))
 
-    # kinesis settings 
+    # kinesis settings
     kinesis_settings = optional(object({
       include_control_details        = optional(bool)
       include_null_and_empty         = optional(bool)
@@ -225,7 +250,7 @@ variable "endpoints" {
       stream_arn                     = optional(string)
     }))
 
-    # mongodb settings 
+    # mongodb settings
     mongodb_settings = optional(object({
       auth_mechanism      = optional(string)
       auth_source         = optional(string)
@@ -235,7 +260,7 @@ variable "endpoints" {
       nesting_level       = optional(number)
     }))
 
-    # redis settings 
+    # redis settings
     redis_settings = optional(object({
       auth_password          = optional(string)
       auth_type              = optional(string)
@@ -246,7 +271,7 @@ variable "endpoints" {
       ssl_security_protocol  = optional(string)
     }))
 
-    # redshift settings 
+    # redshift settings
     redshift_settings = optional(object({
       bucket_folder                     = optional(string)
       bucket_name                       = optional(string)
@@ -256,6 +281,7 @@ variable "endpoints" {
     }))
 
   }))
+  default = {}
 }
 
 ##############
@@ -312,6 +338,7 @@ variable "s3_endpoints" {
     use_task_start_time_for_full_load_timestamp = optional(bool)
     tags                                        = optional(map(string))
   }))
+  default = {}
 }
 
 
@@ -327,11 +354,12 @@ variable "replication_tasks" {
     cdc_start_time            = optional(string)
     source_endpoint_key       = string # Key to reference source endpoint
     target_endpoint_key       = string # Key to reference target endpoint
-    replication_task_settings = optional(map(string))
+    replication_task_settings = optional(string)
     start_replication_task    = optional(bool)
-    table_mappings            = optional(string)
+    table_mappings            = string
     tags                      = optional(map(string))
   }))
+  default = {}
 }
 
 variable "replication_tasks_serverless" {
@@ -355,10 +383,9 @@ variable "replication_tasks_serverless" {
       vpc_security_group_ids       = optional(list(string))
     }))
   }))
-  description = "Optional map of serverless replication tasks"
+  description = "Map of serverless replication tasks"
+  default     = {}
 }
-
-
 
 
 #####################
@@ -389,20 +416,3 @@ variable "event_subscription_timeouts" {
     delete = "1m"
   }
 }
-
-##############
-# Certificate
-##############
-
-variable "certificates" {
-  description = "Map of objects that define the certificates to be created"
-  type = map(object({
-    certificate_id     = string
-    certificate_pem    = optional(string, null)
-    certificate_wallet = optional(string, null) 
-    tags               = optional(map(string), {}) 
-  }))
-  default = {}
-}
-
-

@@ -1,6 +1,49 @@
 ###########
-# IAM Roles 
+# IAM Roles
 ###########
+
+# IAM Role for DMS access to Secrets Manager
+resource "aws_iam_role" "dms_secrets_manager_access_role" {
+  name = "dms-secrets-manager-access-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Effect = "Allow",
+        Principal = {
+          Service = "dms.${var.region}.amazonaws.com"
+        },
+        Action = "sts:AssumeRole"
+      }
+    ]
+  })
+}
+
+# Attach the required policies to the role
+resource "aws_iam_role_policy" "dms_secrets_manager_access_policy" {
+  role = aws_iam_role.dms_secrets_manager_access_role.id
+
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Effect = "Allow",
+        Action = [
+          "secretsmanager:GetSecretValue",
+          "secretsmanager:DescribeSecret",
+          "secretsmanager:ListSecretVersionIds"
+        ],
+        Resource = [for endpoint in var.endpoints : endpoint.secrets_manager_arn]
+      },
+      {
+        Effect   = "Allow",
+        Action   = "iam:PassRole",
+        Resource = aws_iam_role.dms_secrets_manager_access_role.arn
+      }
+    ]
+  })
+}
 
 data "aws_iam_policy_document" "dms_assume_role" {
   statement {
@@ -46,6 +89,23 @@ resource "aws_iam_role_policy_attachment" "dms-vpc-role-AmazonDMSVPCManagementRo
   role       = aws_iam_role.dms-vpc-role.name
 }
 
+
+###################################
+# Replication instance Subnet group
+###################################
+
+resource "aws_dms_replication_subnet_group" "this" {
+  count = var.create_subnet_group ? 1 : 0
+
+  replication_subnet_group_id          = var.subnet_group_id
+  replication_subnet_group_description = var.subnet_group_description
+  subnet_ids                           = var.subnet_group_subnet_ids
+
+  tags = merge(var.tags, var.subnet_group_tags)
+
+  depends_on = [aws_iam_role_policy_attachment.dms-vpc-role-AmazonDMSVPCManagementRole]
+}
+
 ######################
 # Replication instance
 ######################
@@ -62,8 +122,8 @@ resource "aws_dms_replication_instance" "this" {
   network_type                 = var.instance_network_type
   preferred_maintenance_window = var.instance_preferred_maintenance_window
   publicly_accessible          = var.instance_publicly_accessible
-  replication_instance_class   = var.instance_class 
-  replication_instance_id      = var.instance_id    
+  replication_instance_class   = var.instance_class
+  replication_instance_id      = var.instance_id
   replication_subnet_group_id  = var.instance_subnet_group_id
   vpc_security_group_ids       = var.instance_vpc_security_group_ids
 
@@ -74,24 +134,9 @@ resource "aws_dms_replication_instance" "this" {
   depends_on = [
     aws_iam_role_policy_attachment.dms-access-for-endpoint-AmazonDMSRedshiftS3Role,
     aws_iam_role_policy_attachment.dms-cloudwatch-logs-role-AmazonDMSCloudWatchLogsRole,
-    aws_iam_role_policy_attachment.dms-vpc-role-AmazonDMSVPCManagementRole
+    aws_iam_role_policy_attachment.dms-vpc-role-AmazonDMSVPCManagementRole,
+    aws_dms_replication_subnet_group.this
   ]
-}
-
-##########################
-# Replication Subnet group
-##########################
-
-resource "aws_dms_replication_subnet_group" "this" {
-  count = var.create_subnet_group ? 1 : 0
-
-  replication_subnet_group_id          = var.subnet_group_id          
-  replication_subnet_group_description = var.subnet_group_description 
-  subnet_ids                           = var.subnet_group_subnet_ids  
-
-  tags = merge(var.tags, var.subnet_group_tags)
-
-  depends_on = [aws_iam_role_policy_attachment.dms-vpc-role-AmazonDMSVPCManagementRole]
 }
 
 
@@ -100,13 +145,13 @@ resource "aws_dms_replication_subnet_group" "this" {
 #################
 
 resource "aws_dms_certificate" "this" {
-  for_each = var.certificates
+  count = var.create_certificate ? 1 : 0
 
-  certificate_id     = each.value.certificate_id
-  certificate_pem    = each.value.certificate_pem
-  certificate_wallet = each.value.certificate_wallet
+  certificate_id     = var.certificate.certificate_id
+  certificate_pem    = var.certificate.certificate_pem
+  certificate_wallet = var.certificate.certificate_wallet
 
-  tags = merge(var.tags, each.value.tags)
+  tags = merge(var.tags, var.certificate.tags)
 }
 
 
@@ -115,19 +160,16 @@ resource "aws_dms_certificate" "this" {
 ###########
 
 # Fetch the secret from AWS Secrets Manager
-data "aws_secretsmanager_secret" "db_secret" {
-  name = var.endpoint_secret_name 
-}
+data "aws_secretsmanager_secret" "dms_endpoint_secret" {
+  for_each = var.endpoints
 
-data "aws_secretsmanager_secret_version" "db_secret_version" {
-  secret_id = data.aws_secretsmanager_secret.db_secret.id
+  arn = each.value.secrets_manager_arn
 }
-
 
 resource "aws_dms_endpoint" "this" {
   for_each = var.endpoints
 
-  certificate_arn             = aws_dms_certificate.this.certificate_arn != "" ? aws_dms_certificate.this.certificate_arn : null
+  certificate_arn             = var.create_certificate && length(aws_dms_certificate.this) > 0 ? aws_dms_certificate.this[0].certificate_arn : null
   database_name               = each.value.database_name
   endpoint_id                 = each.value.endpoint_id
   endpoint_type               = each.value.endpoint_type
@@ -137,13 +179,11 @@ resource "aws_dms_endpoint" "this" {
   port                        = each.value.port
   server_name                 = each.value.server_name
   ssl_mode                    = each.value.ssl_mode
+  service_access_role         = each.value.service_access_role
 
   # Handling Secrets Manager and Access Role conditions
-  secrets_manager_access_role_arn = each.value.secrets_manager_access_role_arn
-  secrets_manager_arn             = each.value.secrets_manager_arn
-  service_access_role             = each.value.service_access_role
-  username                        = each.value.username
-  password                        = data.aws_secretsmanager_secret_version.db_secret_version.secret_string
+  secrets_manager_access_role_arn = aws_iam_role.dms_secrets_manager_access_role.arn
+  secrets_manager_arn             = data.aws_secretsmanager_secret.dms_endpoint_secret[each.key].arn
 
 
   dynamic "postgres_settings" {
@@ -262,7 +302,7 @@ resource "aws_dms_endpoint" "this" {
 resource "aws_dms_s3_endpoint" "this" {
   for_each = var.s3_endpoints
 
-  certificate_arn = aws_dms_certificate.this.certificate_arn != "" ? aws_dms_certificate.this.certificate_arn : null
+  certificate_arn = var.create_certificate && length(aws_dms_certificate.this) > 0 ? aws_dms_certificate.this[0].certificate_arn : null
   endpoint_id     = each.value.endpoint_id
   endpoint_type   = each.value.endpoint_type
   kms_key_arn     = each.value.kms_key_arn
@@ -325,7 +365,7 @@ resource "aws_dms_replication_task" "this" {
   cdc_start_position        = each.value.cdc_start_position
   cdc_start_time            = each.value.cdc_start_time
   migration_type            = each.value.migration_type
-  replication_instance_arn  = aws_dms_replication_instance.this[0].replication_instance_arn
+  replication_instance_arn  = aws_dms_replication_instance.this.replication_instance_arn
   replication_task_id       = each.value.replication_task_id
   replication_task_settings = each.value.replication_task_settings
   source_endpoint_arn       = aws_dms_endpoint.this[each.value.source_endpoint_key].endpoint_arn
@@ -365,14 +405,12 @@ resource "aws_dms_replication_config" "this" {
     min_capacity_units           = each.value.serverless_config.min_capacity_units
     multi_az                     = each.value.serverless_config.multi_az
     preferred_maintenance_window = each.value.serverless_config.preferred_maintenance_window
-    replication_subnet_group_id  = aws_dms_replication_subnet_group.this.id
+    replication_subnet_group_id  = var.create_subnet_group ? aws_dms_replication_subnet_group.this[0].id : null
     vpc_security_group_ids       = each.value.serverless_config.vpc_security_group_ids
   }
 
   tags = merge(var.tags, each.value.tags)
 }
-
-
 
 
 ######################
@@ -389,8 +427,7 @@ resource "aws_dms_event_subscription" "this" {
 
   source_ids = compact(concat(
     [
-      for instance in aws_dms_replication_instance.this[*] :
-      instance.replication_instance_id if lookup(each.value, "instance_event_subscription_keys", null) == var.instance_id
+      aws_dms_replication_instance.this.replication_instance_id
     ],
     [
       for task in aws_dms_replication_task.this[*] :
@@ -408,4 +445,3 @@ resource "aws_dms_event_subscription" "this" {
     delete = var.event_subscription_timeouts.delete
   }
 }
-

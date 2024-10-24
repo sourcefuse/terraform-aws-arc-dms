@@ -34,68 +34,57 @@ module "tags" {
 module "aws_dms" {
   source = "../modules/dms"
 
-  # Instance
-  instance_allocated_storage            = 5
-  instance_apply_immediately            = true
-  instance_network_type                 = "IPV4"
-  instance_class                        = "dms.t2.micro"
-  instance_id                           = "DMS_POC_instance"
-
-  # Subnet 
-  subnet_group_id          = "dms_poc_subnet"
+  # Subnet
+  subnet_group_id          = "dms-poc-public-subnet-group"
   subnet_group_description = "Subnet for DMS POC"
-  subnet_group_subnet_ids  = ["", ""]
+  subnet_group_subnet_ids  = ["subnet-1", "subnet-2"] #List of Subnet IDs
 
+  # Instance
+  instance_allocated_storage      = 5
+  instance_apply_immediately      = true
+  instance_network_type           = "IPV4"
+  instance_class                  = "dms.t2.micro"
+  instance_id                     = "DMS-POC"
+  instance_subnet_group_id        = "dms-poc-public-subnet-group"
+  instance_publicly_accessible    = true
+  instance_vpc_security_group_ids = ["<sg-id>"] #Security Group ID
 
   endpoints = {
-  db1 = {
-    endpoint_id                     = "poc-endpoint-1"
-    endpoint_type                   = "source"
-    engine_name                     = "postgres"
-    extra_connection_attributes     = "ssl=true"
-    database_name                   = "poc_db"
-    kms_key_arn                     = "arn:aws:kms:prod-region:account-id:key/prod-key-id"
-    port                            = 5432
-    server_name                     = ""
-    ssl_mode                        = "require"
-    secrets_manager_arn             = ""
-    secrets_manager_access_role_arn = ""
-    service_access_role             = ""
-    username                        = "poc-user"
+    db1 = {
+      endpoint_id         = "dms-poc-endpoint-1"
+      endpoint_type       = "source"
+      engine_name         = "postgres"
+      database_name       = "poc"
+      secrets_manager_arn = "<secret-arn>" #Source endpoint secret arn
+      ssl_mode            = "require"
 
-    postgres_settings = {
-      capture_ddls                 = true
-      database_mode                = "full"
-      execute_timeout              = 60
+      postgres_settings = {
+        execute_timeout = 60
+      }
+    }
+
+    db2 = {
+      endpoint_id         = "dms-poc-endpoint-2"
+      endpoint_type       = "target"
+      engine_name         = "postgres"
+      database_name       = "poc_target"
+      secrets_manager_arn = "<secret-arn>" #Target endpoint secret arn
+      ssl_mode            = "require"
     }
   }
 
-  db2 = {
-    endpoint_id                     = "poc-endpoint-2"
-    endpoint_type                   = "target"
-    engine_name                     = "postgres"
-    kms_key_arn                     = "arn:aws:kms:prod-region:account-id:key/prod-key-id"
-    port                            = 5432
-    server_name                     = ""
-    secrets_manager_arn             = ""
-    secrets_manager_access_role_arn = ""
-    service_access_role             = ""
-    username                        = "poc-user"
-  }
-}
-
-
-  s3_endpoints = {}
-
   replication_tasks = {
-  task1 = {
-    replication_task_id       = "replication-task-1"
-    migration_type            = "full-load-and-cdc" # Full load + Change Data Capture
-    source_endpoint_key       = "db1" # References key in endpoints map
-    target_endpoint_key       = "db2" # References key in endpoints map
+    task1 = {
+      replication_task_id = "replication-task-1"
+      migration_type      = "full-load" # Full load
+      source_endpoint_key = "db1"       # References key in endpoints map
+      target_endpoint_key = "db2"       # References key in endpoints map
+      table_mappings      = "{\"rules\":[{\"rule-type\":\"selection\",\"rule-id\":\"1\",\"rule-name\":\"1\",\"object-locator\":{\"schema-name\":\"public\",\"table-name\":\"%\"},\"rule-action\":\"include\"}]}"
+
+    }
   }
-}
 
+  #replication_tasks_serverless = {}
 
-  replication_tasks_serverless = {}
+  #s3_endpoints = {}
 }

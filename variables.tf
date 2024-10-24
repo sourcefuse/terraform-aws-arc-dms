@@ -88,12 +88,6 @@ variable "instance_vpc_security_group_ids" {
   default     = null
 }
 
-variable "create_subnet_group" {
-  description = "Determines whether the replication subnet group will be created"
-  type        = bool
-  default     = true
-}
-
 variable "subnet_group_description" {
   description = "The description for the subnet group"
   type        = string
@@ -116,6 +110,12 @@ variable "subnet_group_tags" {
   description = "A map of additional tags to apply to the replication subnet group"
   type        = map(string)
   default     = {}
+}
+
+variable "create_subnet_group" {
+  description = "Determines whether the replication subnet group will be created"
+  type        = bool
+  default     = true
 }
 
 variable "endpoints" {
@@ -209,22 +209,23 @@ variable "s3_endpoints" {
 }
 
 variable "replication_tasks" {
-  type = optiona(map(object({
+  type = map(object({
     replication_task_id       = string
     migration_type            = string
     cdc_start_position        = optional(string)
     cdc_start_time            = optional(string)
-    source_endpoint_key       = string
-    target_endpoint_key       = string 
-    replication_task_settings = optional(map(string))
+    source_endpoint_key       = string # Key to reference source endpoint
+    target_endpoint_key       = string # Key to reference target endpoint
+    replication_task_settings = optional(string)
     start_replication_task    = optional(bool)
-    table_mappings            = optional(string)
+    table_mappings            = string
     tags                      = optional(map(string))
-  })))
+  }))
+  default = {}
 }
 
 variable "replication_tasks_serverless" {
-  type = optional(map(object({
+  type = map(object({
     migration_type             = string
     replication_task_id        = string
     replication_task_settings  = optional(map(string))
@@ -243,6 +244,6 @@ variable "replication_tasks_serverless" {
       preferred_maintenance_window = optional(string)
       vpc_security_group_ids       = optional(list(string))
     }))
-  })))
-  description = "Optional map of serverless replication tasks"
+  }))
+  description = "Map of serverless replication tasks"
 }
