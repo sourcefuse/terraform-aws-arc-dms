@@ -1,4 +1,6 @@
-# [terraform-aws-arc-vpn](https://github.com/sourcefuse/terraform-aws-arc-dms)
+![Module Structure](./static/banner.png)
+
+# [terraform-aws-arc-dms](https://github.com/sourcefuse/terraform-aws-arc-dms)
 
 ## Overview
 
@@ -6,7 +8,7 @@ SourceFuse AWS Reference Architecture (ARC) Terraform module for creating Databa
 
 ## Usage
 
-To see a Client VPN example, check out the [main.tf](https://github.com/sourcefuse/terraform-aws-arc-vpn/blob/main/examples/client-vpn/main.tf) file in the example folder.
+To see a DMS example, check out the [main.tf](https://github.com/sourcefuse/terraform-aws-arc-dms/tree/main/examples/main.tf) file in the example folder.
 
 ```tcl
 module "aws_dms" {
@@ -61,10 +63,6 @@ module "aws_dms" {
 
     }
   }
-
-  #replication_tasks_serverless = {}
-
-  #s3_endpoints = {}
 }
 ```
 

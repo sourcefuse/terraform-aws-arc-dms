@@ -83,8 +83,4 @@ module "aws_dms" {
 
     }
   }
-
-  #replication_tasks_serverless = {}
-
-  #s3_endpoints = {}
 }

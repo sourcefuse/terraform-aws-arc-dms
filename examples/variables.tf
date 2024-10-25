@@ -12,11 +12,11 @@ variable "region" {
 variable "environment" {
   description = "Name of the environment the resource belongs to."
   type        = string
-  default     = "DMS_POC"
+  default     = "poc"
 }
 
 variable "project_name" {
   description = "Name of the project the vpn resource belongs to."
   type        = string
-  default     = "arc-tf-poc"
+  default     = "arc-example"
 }
