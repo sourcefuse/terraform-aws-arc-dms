@@ -20,7 +20,7 @@ func TestTerraformExample(t *testing.T) {
 	// Assert
 	assert := assert.New(t)
 
-	outputValue := terraform.Output(t, terraformOptions, "output_name") // TODO - set the static output variable from example. this needs to be created / set.
+	outputValue := terraform.Output(t, terraformOptions, "output_name")
 	assert.NotNil(outputValue)
-	assert.Equal("output_value", outputValue) // TODO - what is the output value going to be?
+	assert.Equal("output_value", outputValue)
 }

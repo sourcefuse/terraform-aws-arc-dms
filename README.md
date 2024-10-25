@@ -2,9 +2,19 @@
 
 # [terraform-aws-arc-dms](https://github.com/sourcefuse/terraform-aws-arc-dms)
 
+<a href="https://github.com/sourcefuse/terraform-aws-arc-dms/releases/latest"><img src="https://img.shields.io/github/release/sourcefuse/terraform-aws-arc-dms.svg?style=for-the-badge" alt="Latest Release"/></a> <a href="https://github.com/sourcefuse/terraform-aws-arc-dms/commits"><img src="https://img.shields.io/github/last-commit/sourcefuse/terraform-aws-arc-dms.svg?style=for-the-badge" alt="Last Updated"/></a> ![Terraform](https://img.shields.io/badge/terraform-%235835CC.svg?style=for-the-badge&logo=terraform&logoColor=white) ![GitHub Actions](https://img.shields.io/badge/github%20actions-%232671E5.svg?style=for-the-badge&logo=githubactions&logoColor=white)
+
+[![Quality gate](https://sonarcloud.io/api/project_badges/quality_gate?project=sourcefuse_terraform-aws-arc-dms&token=354a04a27a079f60a649f1f80de398dad83e8ca4)](https://sonarcloud.io/summary/new_code?id=sourcefuse_terraform-aws-arc-dms)
+
+[![Known Vulnerabilities](https://github.com/sourcefuse/terraform-aws-arc-dms/actions/workflows/snyk.yaml/badge.svg)](https://github.com/sourcefuse/terraform-aws-arc-dms/actions/workflows/snyk.yaml)
+
 ## Overview
 
 SourceFuse AWS Reference Architecture (ARC) Terraform module for creating Database Migration Service.
+
+AWS DMS facilitates seamless, secure database migrations to AWS, enabling both homogeneous and heterogeneous data transfers with minimal downtime. DMS supports continuous data replication through Change Data Capture (CDC) and integrates with a broad range of source and target databases, providing a robust, scalable solution for reliable data migration.
+
+For more information about this repository and its usage, please see [Terraform AWS ARC CloudFront Usage Guide](https://github.com/sourcefuse/terraform-aws-arc-dms/blob/main/docs/module-usage-guide/README.md).
 
 ## Usage
 

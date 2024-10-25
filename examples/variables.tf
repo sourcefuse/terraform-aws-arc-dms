@@ -9,6 +9,12 @@ variable "region" {
   default     = "us-east-1"
 }
 
+variable "namespace" {
+  type        = string
+  description = "Namespace to assign the resources"
+  default     = "arc"
+}
+
 variable "environment" {
   description = "Name of the environment the resource belongs to."
   type        = string

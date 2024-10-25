@@ -6,7 +6,7 @@
 
 This document provides guidelines and instructions for users looking to implement Terraform ARC module for using AWS Database Migration Service.
 
-#### What is AWS Client VPN ?
+#### What is AWS DMS ?
 AWS Database Migration Service (AWS DMS) is a cloud service that makes it possible to migrate relational databases, data warehouses, NoSQL databases, and other types of data stores.
 
 ### Module Overview

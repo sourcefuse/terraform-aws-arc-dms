@@ -367,11 +367,12 @@ resource "aws_dms_replication_task" "this" {
   migration_type            = each.value.migration_type
   replication_instance_arn  = aws_dms_replication_instance.this.replication_instance_arn
   replication_task_id       = each.value.replication_task_id
+  resource_identifier       = each.value.replication_task_id
   replication_task_settings = each.value.replication_task_settings
-  source_endpoint_arn       = aws_dms_endpoint.this[each.value.source_endpoint_key].endpoint_arn
+  source_endpoint_arn       = aws_dms_endpoint.this[each.value.source_endpoint_arn].endpoint_arn
   start_replication_task    = each.value.start_replication_task
   table_mappings            = each.value.table_mappings
-  target_endpoint_arn       = aws_dms_endpoint.this[each.value.target_endpoint_key].endpoint_arn
+  target_endpoint_arn       = aws_dms_endpoint.this[each.value.target_endpoint_arn].endpoint_arn
 
   tags = merge(var.tags, each.value.tags)
 }

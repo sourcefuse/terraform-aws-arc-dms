@@ -25,7 +25,7 @@ module "tags" {
 
   extra_tags = {
     Example  = "True"
-    RepoPath = "github.com/terraform-aws-modules"
+    RepoPath = "https://github.com/sourcefuse/terraform-aws-arc-dms"
   }
 }
 
@@ -37,7 +37,7 @@ module "aws_dms" {
   # Subnet
   subnet_group_id          = "dms-poc-public-subnet-group"
   subnet_group_description = "Subnet for DMS POC"
-  subnet_group_subnet_ids  = ["subnet-1", "subnet-2"] #List of Subnet IDs
+  subnet_group_subnet_ids  = data.aws_subnets.this.ids #List of Subnet IDs
 
   # Instance
   instance_allocated_storage      = 5
@@ -47,7 +47,7 @@ module "aws_dms" {
   instance_id                     = "DMS-POC"
   instance_subnet_group_id        = "dms-poc-public-subnet-group"
   instance_publicly_accessible    = true
-  instance_vpc_security_group_ids = ["<sg-id>"] #Security Group ID
+  instance_vpc_security_group_ids = data.aws_security_groups.this.ids #Security Group ID
 
   endpoints = {
     db1 = {
@@ -55,7 +55,7 @@ module "aws_dms" {
       endpoint_type       = "source"
       engine_name         = "postgres"
       database_name       = "poc"
-      secrets_manager_arn = "<secret-arn>" #Source endpoint secret arn
+      secrets_manager_arn = data.aws_secretsmanager_secret.source-secret.arn #Source endpoint secret arn
       ssl_mode            = "require"
 
       postgres_settings = {
@@ -68,7 +68,7 @@ module "aws_dms" {
       endpoint_type       = "target"
       engine_name         = "postgres"
       database_name       = "poc_target"
-      secrets_manager_arn = "<secret-arn>" #Target endpoint secret arn
+      secrets_manager_arn = data.aws_secretsmanager_secret.target-secret.arn #Target endpoint secret arn
       ssl_mode            = "require"
     }
   }
@@ -77,8 +77,8 @@ module "aws_dms" {
     task1 = {
       replication_task_id = "replication-task-1"
       migration_type      = "full-load" # Full load
-      source_endpoint_key = "db1"       # References key in endpoints map
-      target_endpoint_key = "db2"       # References key in endpoints map
+      source_endpoint_arn = "db1"       # References key in endpoints map
+      target_endpoint_arn = "db2"       # References key in endpoints map
       table_mappings      = "{\"rules\":[{\"rule-type\":\"selection\",\"rule-id\":\"1\",\"rule-name\":\"1\",\"object-locator\":{\"schema-name\":\"public\",\"table-name\":\"%\"},\"rule-action\":\"include\"}]}"
 
     }
