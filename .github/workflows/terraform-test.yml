@@ -29,12 +29,12 @@ jobs:
       - name: Checkout PR code
         uses: actions/checkout@v4
         with:
-          ref: refs/pull/${{v.PR_NUMBER }}/head
+          ref: refs/pull/${{ env.PR_NUMBER }}/head
 
       - name: Configure AWS credentials via OIDC
         uses: aws-actions/configure-aws-credentials@v2
         with:
-          role-to-assume: ${{ secrets.AIAC_TERRATEST_ROLE }}
+          role-to-assume: ${{ secrets.ARC_IAC_TERRATEST_ROLE }}
           aws-region: us-east-1
 
       - name: Set up Go
@@ -86,6 +86,6 @@ jobs:
               context: 'terratest',
               description: 'Manual terratest completed successfully',
               target_url: >-
-                https://github.com/${context.repo.owner}/${context.repo.repo}/
-                actions/runs/${process.env.GITHUB_RUN_ID}
+                `https://github.com/${context.repo.owner}/${context.repo.repo}/
+                actions/runs/${process.env.GITHUB_RUN_ID}`
             });
