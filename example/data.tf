@@ -6,14 +6,19 @@ data "aws_vpc" "vpc" {
   }
 }
 
-## Network
+## Network - Public Subnets
 data "aws_subnets" "this" {
   filter {
     name = "tag:Name"
     values = [
-      "${var.project_name}-${var.environment}-subnet-${var.region}a",
-      "${var.project_name}-${var.environment}-subnet-${var.region}b"
+      "${var.project_name}-${var.environment}-public-subnet-public-${var.region}a",
+      "${var.project_name}-${var.environment}-public-subnet-public-${var.region}b"
     ]
+  }
+
+  filter {
+    name   = "vpc-id"
+    values = [data.aws_vpc.vpc.id]
   }
 }
 
@@ -32,9 +37,9 @@ data "aws_security_groups" "this" {
 
 ## Secrets Manager
 data "aws_secretsmanager_secret" "source-secret" {
-  name = "source-secret"
+  name = "arc-poc-rds-connection-details"
 }
 
 data "aws_secretsmanager_secret" "target-secret" {
-  name = "target-secret"
+  name = "arc-dev-target-database-connection"
 }
