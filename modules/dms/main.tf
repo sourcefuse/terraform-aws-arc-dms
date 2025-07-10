@@ -40,6 +40,14 @@ resource "aws_iam_role_policy" "dms_secrets_manager_access_policy" {
         Effect   = "Allow",
         Action   = "iam:PassRole",
         Resource = aws_iam_role.dms_secrets_manager_access_role.arn
+      },
+      {
+        Effect = "Allow",
+        Action = [
+          "kms:Decrypt",
+          "kms:DescribeKey"
+        ],
+        Resource = "*"
       }
     ]
   })

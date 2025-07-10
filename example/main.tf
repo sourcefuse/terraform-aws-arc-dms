@@ -43,8 +43,8 @@ module "aws_dms" {
   instance_allocated_storage      = 5
   instance_apply_immediately      = true
   instance_network_type           = "IPV4"
-  instance_class                  = "dms.t2.micro"
-  instance_id                     = "DMS-POC"
+  instance_class                  = "dms.t3.micro"
+  instance_id                     = "dms-poc"
   instance_subnet_group_id        = "dms-poc-public-subnet-group"
   instance_publicly_accessible    = true
   instance_vpc_security_group_ids = data.aws_security_groups.this.ids #Security Group ID
@@ -54,7 +54,7 @@ module "aws_dms" {
       endpoint_id         = "dms-poc-endpoint-1"
       endpoint_type       = "source"
       engine_name         = "postgres"
-      database_name       = "poc"
+      database_name       = "poc_source"
       secrets_manager_arn = data.aws_secretsmanager_secret.source-secret.arn #Source endpoint secret arn
       ssl_mode            = "require"
 
