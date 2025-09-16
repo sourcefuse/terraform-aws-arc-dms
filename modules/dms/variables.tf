@@ -3,13 +3,6 @@ variable "tags" {
   type        = map(string)
   default     = {}
 }
-
-variable "region" {
-  type        = string
-  description = "AWS region"
-  default     = "us-east-1"
-}
-
 ##############
 # Certificate
 ##############
@@ -191,6 +184,7 @@ variable "endpoints" {
     secrets_manager_access_role_arn = optional(string)
     service_access_role             = optional(string)
     username                        = optional(string)
+    password                        = optional(string)
 
     # postgres settings
     postgres_settings = optional(object({

@@ -2,6 +2,8 @@
 # IAM Roles
 ###########
 
+data "aws_region" "current" {}
+
 # IAM Role for DMS access to Secrets Manager
 resource "aws_iam_role" "dms_secrets_manager_access_role" {
   name = "dms-secrets-manager-access-role"
@@ -12,7 +14,7 @@ resource "aws_iam_role" "dms_secrets_manager_access_role" {
       {
         Effect = "Allow",
         Principal = {
-          Service = "dms.${var.region}.amazonaws.com"
+          Service = "dms.${data.aws_region.current.region}.amazonaws.com"
         },
         Action = "sts:AssumeRole"
       }
@@ -188,6 +190,8 @@ resource "aws_dms_endpoint" "this" {
   server_name                 = each.value.server_name
   ssl_mode                    = each.value.ssl_mode
   service_access_role         = each.value.service_access_role
+  username                    = each.value.username
+  password                    = each.value.password
 
   # Handling Secrets Manager and Access Role conditions
   secrets_manager_access_role_arn = aws_iam_role.dms_secrets_manager_access_role.arn
