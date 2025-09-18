@@ -14,7 +14,7 @@ resource "aws_iam_role" "dms_secrets_manager_access_role" {
       {
         Effect = "Allow",
         Principal = {
-          Service = "dms.${data.aws_region.current.region}.amazonaws.com"
+          Service = "dms.${data.aws_region.current.name}.amazonaws.com"
         },
         Action = "sts:AssumeRole"
       }
