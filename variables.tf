@@ -88,6 +88,12 @@ variable "instance_vpc_security_group_ids" {
   default     = null
 }
 
+variable "prefix" {
+  description = "Prefix to be used for resource naming"
+  type        = string
+  default     = null
+}
+
 variable "subnet_group_description" {
   description = "The description for the subnet group"
   type        = string

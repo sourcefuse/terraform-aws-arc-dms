@@ -6,7 +6,7 @@ data "aws_region" "current" {}
 
 # IAM Role for DMS access to Secrets Manager
 resource "aws_iam_role" "dms_secrets_manager_access_role" {
-  name = "dms-secrets-manager-access-role"
+  name = var.prefix == null ? "${var.prefix}-dms-secrets-manager-access-role" : "dms-secrets-manager-access-role"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17",
@@ -69,7 +69,7 @@ data "aws_iam_policy_document" "dms_assume_role" {
 # DMS <-> Redshift, S3
 resource "aws_iam_role" "dms-access-for-endpoint" {
   assume_role_policy = data.aws_iam_policy_document.dms_assume_role.json
-  name               = "dms-access-for-endpoint"
+  name               = var.prefix == null ? "${var.prefix}-dms-access-for-endpoint" : "dms-access-for-endpoint"
 }
 # DMS <-> Redshift, S3
 resource "aws_iam_role_policy_attachment" "dms-access-for-endpoint-AmazonDMSRedshiftS3Role" {
@@ -80,7 +80,7 @@ resource "aws_iam_role_policy_attachment" "dms-access-for-endpoint-AmazonDMSReds
 # DMS <-> Cloudwatch
 resource "aws_iam_role" "dms-cloudwatch-logs-role" {
   assume_role_policy = data.aws_iam_policy_document.dms_assume_role.json
-  name               = "dms-cloudwatch-logs-role"
+  name               = var.prefix == null ? "${var.prefix}-dms-cloudwatch-logs-role" : "dms-cloudwatch-logs-role"
 }
 # DMS <-> Cloudwatch
 resource "aws_iam_role_policy_attachment" "dms-cloudwatch-logs-role-AmazonDMSCloudWatchLogsRole" {
@@ -91,7 +91,7 @@ resource "aws_iam_role_policy_attachment" "dms-cloudwatch-logs-role-AmazonDMSClo
 # DMS <-> VPC
 resource "aws_iam_role" "dms-vpc-role" {
   assume_role_policy = data.aws_iam_policy_document.dms_assume_role.json
-  name               = "dms-vpc-role"
+  name               = var.prefix == null ? "${var.prefix}-dms-vpc-role" : "dms-vpc-role"
 }
 # DMS <-> VPC
 resource "aws_iam_role_policy_attachment" "dms-vpc-role-AmazonDMSVPCManagementRole" {

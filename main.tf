@@ -34,4 +34,5 @@ module "aws_dms" {
   replication_tasks_serverless = var.replication_tasks_serverless
 
   s3_endpoints = var.s3_endpoints
+  prefix       = var.prefix
 }

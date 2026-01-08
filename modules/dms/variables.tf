@@ -540,3 +540,9 @@ variable "event_subscription_timeouts" {
     delete = "1m"
   }
 }
+
+variable "prefix" {
+  description = "Prefix to be used for resource naming"
+  type        = string
+  default     = null
+}
