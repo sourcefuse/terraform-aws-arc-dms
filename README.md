@@ -21,6 +21,10 @@
 
 ## Overview
 
+## Architecture
+
+![Architecture Diagram](./static/arch.png)
+
 Creates AWS Database Migration Service resources — replication instances, endpoints, and tasks — for homogeneous and heterogeneous database migrations.
 
 ## What It Does
