@@ -351,7 +351,7 @@ variable "s3_endpoints" {
     expected_bucket_owner                       = optional(string)
     external_table_definition                   = optional(string)
     glue_catalog_generation                     = optional(bool)
-    ignore_header_rows                          = optional(bool)
+    ignore_header_rows                          = optional(number)
     include_op_for_full_load                    = optional(bool)
     max_file_size                               = optional(number)
     parquet_timestamp_in_millisecond            = optional(bool)
