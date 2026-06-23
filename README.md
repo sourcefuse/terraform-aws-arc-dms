@@ -19,6 +19,9 @@
 
 [![Quality Gate](https://sonarcloud.io/api/project_badges/quality_gate?project=sourcefuse_terraform-aws-arc-dms&token=354a04a27a079f60a649f1f80de398dad83e8ca4)](https://sonarcloud.io/summary/new_code?id=sourcefuse_terraform-aws-arc-dms)
 
+> [!TIP]
+> 🤖 **New:** Use this module with AI assistants via the [ARC IaC MCP Server](https://github.com/sourcefuse/arc-iac-mcp) — search, scaffold, and security-scan ARC modules from natural language. [Quick setup ↓](#ai-assistant-integration-arc-iac-mcp)
+
 ## Overview
 
 ## Architecture
